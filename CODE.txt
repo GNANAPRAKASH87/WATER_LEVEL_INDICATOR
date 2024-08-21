@@ -1,0 +1,84 @@
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
+
+
+LiquidCrystal_I2C lcd(0x27, 16, 2); 
+
+#define echoPin 3 
+#define trigPin 2
+#define buzz 6
+#define speed 11
+#define pin1 9a
+#define pin2 10
+long duration;
+int distance; 
+
+void setup()
+{
+    lcd.init();
+    lcd.backlight();
+    delay(100);
+    pinMode(speed, OUTPUT);
+    pinMode(pin1, OUTPUT);
+    pinMode(pin2, OUTPUT);
+
+    pinMode(trigPin, OUTPUT); 
+    pinMode(echoPin, INPUT); 
+
+  
+    Serial.begin(9600);
+
+   
+    Serial.println("Distance measurement using Arduino Uno");
+
+    delay(500);
+}
+
+void loop()
+{
+    digitalWrite(trigPin, LOW);
+    delayMicroseconds(2);
+    digitalWrite(trigPin, HIGH);
+    delayMicroseconds(10);
+    digitalWrite(trigPin, LOW);
+    duration = pulseIn(echoPin, HIGH);
+    distance = duration * 0.0344 / 2;
+    Serial.print("Distance: ");
+    Serial.print(distance);
+    Serial.println(" cm");
+
+  
+  if(distance <=30){
+    tone(buzz,85);
+    digitalWrite(pin1, LOW);
+    digitalWrite(pin2, HIGH);
+  }
+  else if(distance>30&&distance<335){
+    noTone(buzz);
+    analogWrite(speed,150);
+    digitalWrite(pin1, LOW);
+    digitalWrite(pin2, HIGH);
+  }
+  
+  else {
+    noTone(buzz);
+   analogWrite(speed,100);
+   digitalWrite(pin1, LOW);
+    digitalWrite(pin2, HIGH);
+  }
+  distance=(distance*100)/335;
+  distance=100-distance;
+  if(distance>=195){
+    distance=0;
+  }
+    lcd.clear();
+    delay(10);
+    lcd.setCursor(0, 0);
+    lcd.print("Water Level");
+    lcd.setCursor(0, 1); 
+    lcd.print(distance); 
+    lcd.setCursor(3, 1);
+    lcd.print("%");
+
+    delay(500);
+}
